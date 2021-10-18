@@ -11,4 +11,4 @@ Enter an integer for number of trials when prompted. Will break if you enter a f
 Example output:
 >The value of Pi calculated from 10000000 random points is: 3.14054
 >
->with relative error: 0.64872E-0
+>with relative error: 0.64872E-02
