@@ -40,7 +40,7 @@ do N = 1, NS-1
     call signal(2, sigint_func)
 end do
 
-call results(N, pi_sum, pi_sum_squared)
+call results()
 
 end program
     
@@ -60,11 +60,12 @@ subroutine results()
 end subroutine 
 
 subroutine sigint_func()
+    use globals
     implicit NONE 
     external results
     write(*,*) 'Program terminated after ', N, ' trials:' 
     
-    call results(N, PI_sum, Pi_sum_squared) 
+    call results() 
 
-    return
+    stop
 end subroutine
