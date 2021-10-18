@@ -8,7 +8,7 @@ INTRINSIC SIGNAL
 REAL(8)    :: pi_est 
 INTEGER(8) :: SUCCESS
 INTEGER(8) :: NS
-REAL(16)   :: XR,YCALC,YR
+REAL(16)   :: XR,YR
 character(*), parameter :: fmto = '(A31, I9.3, A18, F8.5, /, A20, e12.5)'
 
 EXTERNAL SIGINT_FUNC, RESULTS
@@ -25,9 +25,8 @@ WRITE(*,*) 'Calculating Pi with ', NS, ' random X,Y pairs...'
 do N = 1, NS-1
     call RANDOM_NUMBER(XR) ! = RAND()
     call RANDOM_NUMBER(YR) ! = RAND()
-    YCALC=sqrt(1-XR*XR)
     
-    if (YR <= YCALC) then
+    if (XR*XR+YR*YR <= 1) then
         success=success+1
     endif
     if (MOD(N,10000)==0) then
