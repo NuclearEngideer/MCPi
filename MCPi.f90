@@ -6,10 +6,8 @@ IMPLICIT NONE
 
 INTRINSIC SIGNAL
 REAL(8)    :: pi_est 
-INTEGER(8) :: SUCCESS
-INTEGER(8) :: NS
+INTEGER(8) :: SUCCESS, NS, F
 REAL(16)   :: XR,YR
-character(*), parameter :: fmto = '(A31, I9.3, A18, F8.5, /, A20, e12.5)'
 
 EXTERNAL SIGINT_FUNC, RESULTS
 
@@ -22,6 +20,8 @@ PI_sum_squared=0
 
 WRITE(*,*) 'Calculating Pi with ', NS, ' random X,Y pairs...'
 
+f = NS/100
+
 do N = 1, NS-1
     call RANDOM_NUMBER(XR) ! = RAND()
     call RANDOM_NUMBER(YR) ! = RAND()
@@ -29,7 +29,7 @@ do N = 1, NS-1
     if (XR*XR+YR*YR <= 1) then
         success=success+1
     endif
-    if (MOD(N,10000)==0) then
+    if (MOD(N,F)==0) then
          write(*,*) 'Number of points so far: ', N
     endif
     PI_est = 4*REAL(SUCCESS)/REAL(N)
@@ -48,7 +48,7 @@ subroutine results()
     IMPLICIT NONE
     real(8) :: Pi
     
-    character(*), parameter :: fmto = '(A31, I9.3, A18, F8.5, /, A20, e12.5)'
+    character(*), parameter :: fmto = '(A31, I9.3, A18, F8.5, /, A20, es12.5)'
     
     PI=PI_sum/N  ! Calculate the estimated mean
 
