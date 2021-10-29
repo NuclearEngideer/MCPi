@@ -9,8 +9,11 @@ Enter an integer for number of trials when prompted. Will break if you enter a f
 
 Example output:
 > Calculating Pi with            1000000000  random X,Y pairs...
+> 
 > With           10 threads.
+> 
 > estimate for pi   3.14162874    
+> 
 > calculation took   32.8685074     seconds
 
 Some plots of convergence to the value of Pi and the parallel efficiency follow:
