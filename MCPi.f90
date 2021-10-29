@@ -10,9 +10,8 @@ REAL(8), allocatable :: pi_est(:)
 INTEGER(8)    :: NS, F, calc_per_thread, id, upper, lower, i
 REAL(16)      :: XR,YR
 INTEGER(4)    :: threads
-CHARACTER(4)  :: threads_string
-CHARACTER(128) :: set_thread_cmd
 INTEGER(8), allocatable :: thread_div(:), success(:)
+REAL :: start, finish
 
 EXTERNAL SIGINT_FUNC, RESULTS, THREAD_FUNC
 
@@ -22,18 +21,12 @@ READ(*,*) NS
 WRITE(*,*) 'Enter the number of threads to calculate pi with'
 READ(*,*) threads
 
-! Write the threads integer to character for the env. variable call
-write(threads_string, '(I4)') threads
-set_thread_cmd = 'export OMP_NUM_THREADS='//trim(adjustl(threads_string))
+!$ CALL OMP_SET_NUM_THREADS( threads )
 
 allocate( pi_est( threads ) )
 allocate( pi_sum( threads ) )
 allocate( success( threads ) )
 allocate( thread_div( threads ) )
-
-write(*,*) set_thread_cmd 
-
-CALL EXECUTE_COMMAND_LINE(set_thread_cmd)
 
 pi_est=0
 SUCCESS=0
@@ -53,7 +46,9 @@ do I = 1, size(thread_div)
 enddo
 if (thread_div(size(thread_div)) /= NS) thread_div(size(thread_div)) = NS
 
-! Begin parallelization, maybe
+call cpu_time(start)
+
+! Begin parallel loop
 !$OMP PARALLEL PRIVATE(id, lower, upper, N, XR, YR)
 
 id = OMP_GET_THREAD_NUM()
@@ -75,15 +70,22 @@ do N = lower, upper
     if ( XR*XR+YR*YR <= 1 ) then
         success(id+1) = success(id+1) + 1
     endif
-    PI_est(id+1) = 4*REAL(SUCCESS(id+1))/REAL(N)
-    PI_sum(id+1)=PI_sum(id+1)+PI_est(id+1)
+
+!    PI_est(id+1) = 4*REAL(SUCCESS(id+1))/REAL(N)
+!    This doesn't work because it needs to be divided by the step through the interval, not the N
+!    PI_sum(id+1)=PI_sum(id+1)+PI_est(id+1)
 end do
 
 !$OMP END PARALLEL
 
-write(*,*) 'estimate for pi', pi_sum
+call cpu_time(finish)
 
-write(*,*) 'alternate estimate for pi', 4*real(sum(success))/NS
+! write(*,*) 'estimate for pi', pi_sum, '//', sum(pi_sum)
+
+write(*,*) 'estimate for pi', 4*real(sum(success))/NS
+
+write(*,*) 'calculation took', (finish-start)/threads, 'seconds'
+
 ! call results()
 
 end program
