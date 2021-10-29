@@ -11,6 +11,7 @@ INTEGER(8)    :: NS, F, calc_per_thread, id, upper, lower, i
 REAL(16)      :: XR,YR
 INTEGER(4)    :: threads
 CHARACTER(4)  :: threads_string
+CHARACTER(128) :: set_thread_cmd
 INTEGER(8), allocatable :: thread_div(:), success(:)
 
 EXTERNAL SIGINT_FUNC, RESULTS, THREAD_FUNC
@@ -23,13 +24,16 @@ READ(*,*) threads
 
 ! Write the threads integer to character for the env. variable call
 write(threads_string, '(I4)') threads
+set_thread_cmd = 'export OMP_NUM_THREADS='//trim(adjustl(threads_string))
 
 allocate( pi_est( threads ) )
 allocate( pi_sum( threads ) )
 allocate( success( threads ) )
 allocate( thread_div( threads ) )
 
-! CALL SYSTEM('export OMP_NUM_THREADS='//threads_string)
+write(*,*) set_thread_cmd 
+
+CALL EXECUTE_COMMAND_LINE(set_thread_cmd)
 
 pi_est=0
 SUCCESS=0
@@ -53,7 +57,10 @@ if (thread_div(size(thread_div)) /= NS) thread_div(size(thread_div)) = NS
 !$OMP PARALLEL PRIVATE(id, lower, upper, N, XR, YR)
 
 id = OMP_GET_THREAD_NUM()
-if ( id == 0 ) then
+if ( OMP_GET_NUM_THREADS() == 1 ) then
+    lower = 1
+    upper = ns
+else if ( id == 0 ) then
     lower = 1
     upper = thread_div(id+1)
 else
@@ -62,21 +69,14 @@ else
 endif
 
 do N = lower, upper
-
     call RANDOM_NUMBER(XR)
     call RANDOM_NUMBER(YR)
     
     if ( XR*XR+YR*YR <= 1 ) then
-        success(id)=success(id)+1
+        success(id+1) = success(id+1) + 1
     endif
-!    if ( MOD(N,F)==0 ) then
-!         write(*,*) 'Number of points so far: ', N
-!    endif
-    PI_est(id) = 4*REAL(SUCCESS(id))/REAL(N)
-    PI_sum(id)=PI_sum(id)+PI_est(id)
-!    PI_sum_squared=Pi_sum_squared+(Pi_est*Pi_est)
-!    ! Sigint handling
-!    call signal(2, sigint_func)
+    PI_est(id+1) = 4*REAL(SUCCESS(id+1))/REAL(N)
+    PI_sum(id+1)=PI_sum(id+1)+PI_est(id+1)
 end do
 
 !$OMP END PARALLEL
