@@ -70,49 +70,14 @@ do N = lower, upper
     if ( XR*XR+YR*YR <= 1 ) then
         success(id+1) = success(id+1) + 1
     endif
-
-!    PI_est(id+1) = 4*REAL(SUCCESS(id+1))/REAL(N)
-!    This doesn't work because it needs to be divided by the step through the interval, not the N
-!    PI_sum(id+1)=PI_sum(id+1)+PI_est(id+1)
 end do
 
 !$OMP END PARALLEL
 
 call cpu_time(finish)
 
-! write(*,*) 'estimate for pi', pi_sum, '//', sum(pi_sum)
-
 write(*,*) 'estimate for pi', 4*real(sum(success))/NS
 
 write(*,*) 'calculation took', (finish-start)/threads, 'seconds'
 
-! call results()
-
 end program
-    
-! subroutine results()
-!     use globals
-!     IMPLICIT NONE
-!     real(8) :: Pi
-!     
-!     character(*), parameter :: fmto = '(A31, I9.3, A18, F8.5, /, A20, es12.5)'
-!     
-!     PI=PI_sum/N  ! Calculate the estimated mean
-! 
-!     ! Caluclate the variance of the mean
-!     rel_error = sqrt(((N/(N-1))*((Pi_sum_squared/n) - (Pi*Pi))))/Pi
-! 
-!     write(*, fmt=fmto) 'The value of Pi calculated from ', N, ' random points is: ', Pi, 'with relative error: ', rel_error
-! end subroutine 
-! 
-! subroutine sigint_func()
-!     use globals
-!     implicit NONE 
-!     external results
-!     write(*,*) 'Program terminated after ', N, ' trials:' 
-!     
-!     call results() 
-! 
-!     stop
-! end subroutine
-! 
